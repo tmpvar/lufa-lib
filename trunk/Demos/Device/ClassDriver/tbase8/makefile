@@ -29,7 +29,7 @@ LD_FLAGS     =
 all:
 
 flash:
-	avrdude -p m32u4 -P /dev/tty.usbmodemfd121 -c avr109 -U flash:w:tbase8.hex:i
+	avrdude -p m32u4 -P /dev/tty.usbmodemfd121 -c avr109 -U flash:w:$(TARGET).hex:i
 
 
 
