@@ -33,8 +33,33 @@
  *  Header file for MIDI.c.
  */
 
-#ifndef _AUDIO_OUTPUT_H_
-#define _AUDIO_OUTPUT_H_
+#ifndef _TBASE8_H_
+#define _TBASE8_H_
+
+  /** LUFA MIDI Class driver interface configuration and state information. This structure is
+   *  passed to all MIDI Class driver functions, so that multiple instances of the same class
+   *  within a device can be differentiated from one another.
+   */
+  USB_ClassInfo_MIDI_Device_t tbase8_MIDI_Interface =
+    {
+      .Config =
+        {
+          .StreamingInterfaceNumber = 1,
+          .DataINEndpoint           =
+            {
+              .Address          = MIDI_STREAM_IN_EPADDR,
+              .Size             = MIDI_STREAM_EPSIZE,
+              .Banks            = 1,
+            },
+          .DataOUTEndpoint          =
+            {
+              .Address          = MIDI_STREAM_OUT_EPADDR,
+              .Size             = MIDI_STREAM_EPSIZE,
+              .Banks            = 1,
+            },
+        },
+    };
+
 
   /* Includes: */
     #include <avr/io.h>
