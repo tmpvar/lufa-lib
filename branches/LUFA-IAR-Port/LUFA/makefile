@@ -1,0 +1,47 @@
+#
+#             LUFA Library
+#     Copyright (C) Dean Camera, 2012.
+#
+#  dean [at] fourwalledcubicle [dot] com
+#           www.lufa-lib.org
+#
+# ---------------------------------------
+#  Makefile for the LUFA library itself.
+# ---------------------------------------
+
+LUFA_VERSION_NUM        := $(shell grep LUFA_VERSION_STRING Version.h | cut -d'"' -f2)
+EXCLUDE_FROM_EXPORT     := Documentation DoxygenPages CodeTemplates Build *.conf *.tar *.o *.d *.lss *.lst *.hex *.elf *.hex *.eep *.map *.bin
+
+all:
+
+export_tar:
+	@echo Exporting LUFA library to a TAR archive...
+	@tar -cf LUFA_$(LUFA_VERSION_NUM).tar --directory=. $(EXCLUDE_FROM_EXPORT:%=--exclude=%) *
+	@tar -cf LUFA_$(LUFA_VERSION_NUM)_Code_Templates.tar CodeTemplates
+	@echo Export LUFA_$(LUFA_VERSION_NUM).tar complete.
+
+version:
+	@echo "LUFA $(LUFA_VERSION_NUM)"
+
+# Check if this is being included from a legacy or non LUFA build system makefile
+ifneq ($(LUFA_PATH),)
+  LUFA_ROOT_PATH = $(LUFA_PATH)/LUFA/
+  
+  include $(LUFA_PATH)/LUFA/Build/lufa.sources.in
+else
+  LUFA_BUILD_MODULES     += MASTER
+  LUFA_BUILD_TARGETS     += export_tar version
+
+  LUFA_PATH               = .
+  ARCH                    = {AVR8,UC3,XMEGA}
+  DOXYGEN_OVERRIDE_PARAMS = QUIET=YES PROJECT_NUMBER=$(LUFA_VERSION_NUM)
+  
+  clean:
+	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.o)
+	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.d)
+	rm -f $(LUFA_SRC_ALL_FILES:%.c=%.lst)
+
+  include Build/lufa.core.in
+  include Build/lufa.sources.in
+  include Build/lufa.doxygen.in
+endif
