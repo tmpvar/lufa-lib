@@ -80,6 +80,9 @@ int main(void)
   SetupHardware();
   uint16_t bytesAvailable, currentByte;
 
+  CDC_Device_CreateStream(&tpad_CDC_Interface, &USBSerialStream);
+  sei();
+
   for (;;)
   {
 
@@ -91,7 +94,7 @@ int main(void)
     //
     // Handle incoming bytes
     //
-    bytesAvailable = CDC_Device_BytesRecieved(&tpad_CDC_Interface);
+    bytesAvailable = CDC_Device_BytesReceived(&tpad_CDC_Interface);
     while (bytesAvailable--) {
       currentByte = CDC_Device_ReceiveByte(&tpad_CDC_Interface);
       // TODO: implement led updates from host
@@ -112,44 +115,103 @@ void SetupHardware(void)
   /* Disable clock division */
   clock_prescale_set(clock_div_1);
   USB_Init();
-  CDC_Device_CreateStream(&tpad_CDC_Interface, &USBSerialStream);
-  sei();
+
 
   //
   // Setup sensor power pins
   //
-  DDRB = 0b11000000;
-  DDRD = 0b11000000;
+  DDRD = 0;
   PORTD = 0;
-  PORTB = 0;
 
   // Configure ADC
-  ADC_Init(ADC_PRESCALE_2 | ADC_FREE_RUNNING | ADC_REFERENCE_AVCC)
+  ADC_Init(ADC_PRESCALE_32 | ADC_FREE_RUNNING);
 
   // Setup sensor read pins
+  ADC_SetupChannel(0);
+  ADC_SetupChannel(1);
   ADC_SetupChannel(4);
   ADC_SetupChannel(5);
   ADC_SetupChannel(6);
   ADC_SetupChannel(7);
+  ADC_SetupChannel(12);
+  ADC_SetupChannel(13);
 }
 
 void ButtonStates(void) {
 
+  uint16_t port, result;
+  char buffer[64];
+
+  PORTD = 0b11111111;
+  /*for (int i=0; i<4; i++) {
+    if (i > 1) {
+      PORTC = (i%1 == 0) ? 0b01000000 : 0b10000000;
+    } else {
+      PORTB = (i%1 == 0) ? 0b01000000 : 0b10000000;
+    }
+*/
+    // TODO: dry this up
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL0);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "4,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL1);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "0,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL4);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "1,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL5);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "2,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL6);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "3,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL12);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "7,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL13);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "6,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL7);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "5,%d\n", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+/*
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_RIGHT_ADJUSTED | ADC_CHANNEL5);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "  %d", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_RIGHT_ADJUSTED | ADC_CHANNEL6);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "  %d", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
+
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_RIGHT_ADJUSTED | ADC_CHANNEL7);
+    while(!(ADC_IsReadingComplete())) {}
+    sprintf(buffer, "  %d", ADC_GetResult());
+    fputs(buffer, &USBSerialStream);
 
 
-}
-
-
-/** Event handler for the library USB Connection event. */
-void EVENT_USB_Device_Connect(void)
-{
-  LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
-}
-
-/** Event handler for the library USB Disconnection event. */
-void EVENT_USB_Device_Disconnect(void)
-{
-  LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
+    PORTB = 0;
+    PORTC = 0;
+  //}
+  */
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -158,8 +220,6 @@ void EVENT_USB_Device_ConfigurationChanged(void)
   bool ConfigSuccess = true;
 
   ConfigSuccess &= CDC_Device_ConfigureEndpoints(&tpad_CDC_Interface);
-
-  LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
 }
 
 /** Event handler for the library USB Control Request reception event. */
