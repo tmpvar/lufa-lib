@@ -133,8 +133,8 @@ void SetupHardware(void)
   ADC_SetupChannel(5);
   ADC_SetupChannel(6);
   ADC_SetupChannel(7);
+  ADC_SetupChannel(11);
   ADC_SetupChannel(12);
-  ADC_SetupChannel(13);
 }
 
 void ButtonStates(void) {
@@ -176,12 +176,12 @@ void ButtonStates(void) {
     sprintf(buffer, "3,%d\n", ADC_GetResult());
     fputs(buffer, &USBSerialStream);
 
-    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL12);
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL11);
     while(!(ADC_IsReadingComplete())) {}
     sprintf(buffer, "7,%d\n", ADC_GetResult());
     fputs(buffer, &USBSerialStream);
 
-    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL13);
+    ADC_StartReading(ADC_REFERENCE_AVCC | ADC_LEFT_ADJUSTED | ADC_CHANNEL12);
     while(!(ADC_IsReadingComplete())) {}
     sprintf(buffer, "6,%d\n", ADC_GetResult());
     fputs(buffer, &USBSerialStream);
