@@ -245,9 +245,25 @@ void ButtonStates(void) {
       results[button] = result;
 
       if (!connected) {
-        // TODO: hsv fade
-        colors[button][0] = (result > 1000) ? 1023: 0;
-      } else {
+        if (result < 1000) {
+          colors[button][0] = 0;
+          colors[button][1] = 0;
+          colors[button][2] = 0;
+        } else if (result < 8000) {
+          colors[button][0] = 1023;
+          colors[button][1] = 0;
+          colors[button][2] = 0;
+        } else if (result < 13000) {
+          colors[button][0] = 0;
+          colors[button][1] = 1023;
+          colors[button][2] = 0;
+        } else {
+          colors[button][0] = 0;
+          colors[button][1] = 0;
+          colors[button][2] = 1023;
+        }
+      // ignore the bounces at the bottom of the pressure range
+      } else if (result > 2000) {
         sprintf(buffer, "%d,%u\n", button, result);
         fputs(buffer, &USBSerialStream);
       }

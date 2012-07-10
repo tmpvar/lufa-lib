@@ -39,9 +39,9 @@
         };
         struct
         {
-            unsigned red:10;
-            unsigned green:10;
             unsigned blue:10;
+            unsigned green:10;
+            unsigned red:10;
             unsigned command:1;
         };
     } a6281Packet;
