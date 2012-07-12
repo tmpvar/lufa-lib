@@ -152,14 +152,10 @@ int main(void)
 
       wasConnected = false;
       parserPos = 0;
-    }
-
-    //
-    // Handle incoming bytes
-    //
-    bytesAvailable = CDC_Device_BytesReceived(&tpad_CDC_Interface);
-    if (bytesAvailable) {
-      parseChunk(CDC_Device_ReceiveByte(&tpad_CDC_Interface));
+    } else if ((bytesAvailable = CDC_Device_BytesReceived(&tpad_CDC_Interface))) {
+      while (bytesAvailable--) {
+        parseChunk(CDC_Device_ReceiveByte(&tpad_CDC_Interface));
+      }
     }
 
     CDC_Device_USBTask(&tpad_CDC_Interface);
