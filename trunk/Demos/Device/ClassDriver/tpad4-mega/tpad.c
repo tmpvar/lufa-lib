@@ -202,8 +202,12 @@ void ButtonStates(void) {
   } else if (ADC_IsReadingComplete()) {
     result = ADC_GetResult();
 
+    if (result < 150) {
+      result = 0;
+    }
+
     if (results[button] != result) {
-      results[button] = result;
+
 
       if (!connected) {
         if (result < 1000) {
@@ -224,10 +228,12 @@ void ButtonStates(void) {
           colors[button][2] = 1023;
         }
       // ignore the bounces at the bottom of the pressure range
-      } else if (result > 2000) {
+      } else {
         sprintf(buffer, "%d,%u\n", button, result);
         fputs(buffer, &USBSerialStream);
       }
+
+      results[button] = result;
     }
 
     button++;
