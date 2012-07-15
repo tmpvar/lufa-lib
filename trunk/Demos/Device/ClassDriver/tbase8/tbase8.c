@@ -44,31 +44,57 @@ int main(void) {
     if (TCNT1 >= 1000) {
       tick++;
     }
-    //MIDI_EventPacket_t ReceivedMIDIEvent;
-    /*while (MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &ReceivedMIDIEvent)) {
-
-    }*/
 
     int inputPins[4] = { 0b00000010, 0b00001000, 0b00100000, 0b10000000 };
-    int port;
+    int ledPins[8] = {
+      0b00000001,
+      0b00000010,
+      0b00010000,
+      0b00100000,
+      0b01000000,
+      0b10000000,
+      0b10000000,
+      0b01000000
+    };
+
+    int port, ledPort;
     int current;
     unsigned long currentTime;
     for (int i=0; i<8; i++) {
 
+
       port = (i<4) ? PIND : PINB;
+
+
       current = i%4;
       if (port & inputPins[current]) {
-        if (!inputs[i].pressed && tick > inputs[i].lastOn) {
+        if (!inputs[i].pressed && tick > inputs[i].lastOn + 2500) {
           inputs[i].pressed = true;
           inputs[i].on = !inputs[i].on;
           inputs[i].lastOn = tick;
           // Send midi stuff
           sendMidiNote(i, inputs[i].on);
+
+          if (i<6) {
+            if (inputs[i].on) {
+              PORTF |= ledPins[i];
+            } else {
+              PORTF &= (ledPins[i] ^ 0xFF);
+            }
+          } else {
+            if (inputs[i].on) {
+              PORTC |= ledPins[i];
+            } else {
+              PORTC &= (ledPins[i] ^ 0xFF);
+            }
+          }
         }
       } else {
         inputs[i].pressed = false;
         //sendMidiNote(i, false);
       }
+
+      ledPort |= ledPins[i];
     }
 
 
@@ -108,8 +134,12 @@ void SetupHardware(void)
   /* Set the port directions for port b and d */
   DDRD  = 0xFF;
   DDRB  = 0xFF;
+  DDRF  = 0xFF;
+  DDRC  = 0xFF;
   PORTD = 0b01010101;
   PORTB = 0b01010101;
+  PORTF = 0b00000000;
+  PORTC = 0b00000000;
 
   /* Hardware Initialization */
   USB_Init();
