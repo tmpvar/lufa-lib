@@ -9,17 +9,17 @@
 # Static anlysis of the entire LUFA source tree, using the free cross-platform "cppcheck" tool.
 
 # Path to the LUFA library core
-LUFA_PATH         = ../../LUFA/
+LUFA_PATH := ../../LUFA/
 
-CPPCHECK_EXCLUDES = FATFs/            \
-                    PetiteFATFs/      \
-                    uip/
-CPPCHECK_INCLUDES = $(patsubst %/,%,$(LUFA_PATH))/CodeTemplates/   \
-                    $(patsubst %/,%,$(LUFA_PATH))/../Projects/AVRISP-MKII/
+CPPCHECK_EXCLUDES := FATFs/            \
+                     PetiteFATFs/      \
+                     uip/
+CPPCHECK_INCLUDES := $(patsubst %/,%,$(LUFA_PATH))/CodeTemplates/               \
+                     $(patsubst %/,%,$(LUFA_PATH))/../Projects/AVRISP-MKII/
 
-SRC               = $(patsubst %/,%,$(LUFA_PATH))/..
+SRC               := $(patsubst %/,%,$(LUFA_PATH))/..
 
-all: begin cppcheck-config cppcheck end
+all: begin cppcheck end
 
 begin:
 	@echo Executing build test "StaticAnalysisTest".
@@ -35,5 +35,5 @@ end:
 .PHONY: all begin end
 
 # Include LUFA build script makefiles
-include $(LUFA_PATH)/Build/lufa.core.in
-include $(LUFA_PATH)/Build/lufa.cppcheck.in
+include $(LUFA_PATH)/Build/lufa_core.mk
+include $(LUFA_PATH)/Build/lufa_cppcheck.mk
